@@ -72,6 +72,12 @@ M.VERSION = version.current
 local state = state_mod.state
 local known_package_managers = state_mod.known_package_managers
 
+---@param policy string|nil
+---@return boolean
+local function is_valid_open_quickfix(policy)
+  return policy == 'on_items' or policy == 'always' or policy == 'never'
+end
+
 ---@param cmd string
 ---@param opts quickmate.RunOpts|nil
 function M.run(cmd, opts)
@@ -122,18 +128,31 @@ end
 ---@param opts quickmate.SetupOpts|nil
 function M.setup(opts)
   opts = opts or {}
+  state_mod.reset_config()
 
   parser_registry.register_builtin_parsers(state)
   presets.register_builtin_presets(state)
 
-  state.open_quickfix = opts.open_quickfix or state.open_quickfix
-  state.default_errorformat = opts.default_errorformat or state.default_errorformat
+  if is_valid_open_quickfix(opts.open_quickfix) then
+    state.open_quickfix = opts.open_quickfix
+  end
+  if type(opts.default_errorformat) == 'string' and opts.default_errorformat ~= '' then
+    state.default_errorformat = opts.default_errorformat
+  end
   state.commands = opts.commands ~= false
   if type(opts.package_manager) == 'string' and known_package_managers[opts.package_manager] then
     state.package_manager = opts.package_manager
   end
   if type(opts.package_manager_priority) == 'table' and #opts.package_manager_priority > 0 then
-    state.package_manager_priority = opts.package_manager_priority
+    local priority = {}
+    for _, pm in ipairs(opts.package_manager_priority) do
+      if type(pm) == 'string' and known_package_managers[pm] then
+        priority[#priority + 1] = pm
+      end
+    end
+    if #priority > 0 then
+      state.package_manager_priority = priority
+    end
   end
 
   if type(opts.presets) == 'table' then
