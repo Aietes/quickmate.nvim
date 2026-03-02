@@ -1,4 +1,6 @@
 local progress_notify = require 'quickmate.progress'
+local parser_registry = require 'quickmate.parsers'
+local preset_registry = require 'quickmate.presets'
 local state_mod = require 'quickmate.state'
 local util = require 'quickmate.util'
 
@@ -6,6 +8,15 @@ local M = {}
 
 local state = state_mod.state
 local known_package_managers = state_mod.known_package_managers
+
+local function ensure_builtins_registered()
+  if vim.tbl_isempty(state.parsers) then
+    parser_registry.register_builtin_parsers(state)
+  end
+  if vim.tbl_isempty(state.presets) then
+    preset_registry.register_builtin_presets(state)
+  end
+end
 
 ---@param cmd string
 ---@return string|nil
@@ -211,6 +222,10 @@ local function parse_with_fallback(parser_name, parser_fn, ctx)
   end
 
   local fallback = state.parsers.efm
+  if type(fallback) ~= 'function' then
+    vim.notify('check: fallback parser unavailable (call require("quickmate").setup())', vim.log.levels.ERROR)
+    return { items = {}, ok = true }, 'efm'
+  end
   local parsed, _, _ = safe_parse('efm', fallback, ctx)
   if not parsed then
     parsed = { items = {}, ok = true }
@@ -247,6 +262,7 @@ end
 ---@param cmd string
 ---@param opts quickmate.RunOpts|nil
 function M.run(cmd, opts)
+  ensure_builtins_registered()
   cmd = util.normalize_command_input(cmd)
   if cmd == '' then
     vim.notify('check: missing command', vim.log.levels.ERROR)
@@ -377,6 +393,7 @@ end
 ---@param name string
 ---@param opts quickmate.RunOpts|nil
 function M.run_script(name, opts)
+  ensure_builtins_registered()
   if type(name) ~= 'string' or name == '' then
     vim.notify('check: missing script name', vim.log.levels.ERROR)
     return
@@ -397,6 +414,7 @@ end
 ---@param name string
 ---@param opts quickmate.RunOpts|nil
 function M.run_preset(name, opts)
+  ensure_builtins_registered()
   local preset = state.presets[name]
   if not preset then
     vim.notify(string.format('check: unknown preset "%s"', name), vim.log.levels.ERROR)
@@ -405,8 +423,9 @@ function M.run_preset(name, opts)
 
   local cwd = (opts and opts.cwd) or preset.cwd or (vim.fs.root(0, { 'package.json', '.git' }) or vim.uv.cwd() or '.')
   local package_manager = resolve_package_manager(cwd, opts and opts.package_manager or nil)
-  if not package_manager then
-    package_manager = 'pnpm'
+  if type(preset.cmd) == 'function' and not package_manager then
+    vim.notify('check: no package manager found (pnpm/bun/npm/yarn)', vim.log.levels.ERROR)
+    return
   end
 
   local cmd = type(preset.cmd) == 'function' and preset.cmd({ package_manager = package_manager, cwd = cwd }) or preset.cmd
