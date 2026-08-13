@@ -278,14 +278,19 @@ end
 ---@param output string
 ---@return boolean
 local function is_command_not_found(code, output)
-  local text = output:lower()
   if code == 127 then
     return true
   end
-  if text:match 'command not found' then
+  if code == 0 then
+    return false
+  end
+  -- only trust the shell's own message on the first line; diagnostics later
+  -- in the output may legitimately contain these phrases
+  local first_line = util.first_nonempty_line(output):lower()
+  if first_line:match 'command not found' then
     return true
   end
-  if text:match 'not recognized as an internal or external command' then
+  if first_line:match 'not recognized as an internal or external command' then
     return true
   end
   return false
@@ -351,10 +356,11 @@ function M.run(cmd, opts)
 
       local duration_ms = math.floor((vim.uv.hrtime() - started_at) / 1e6)
       local command_missing = is_command_not_found(res.code, combined)
+      local timed_out = opts.timeout_ms ~= nil and (res.code == 124 or res.signal == 15)
       local parser_used = 'efm'
       local items = {}
 
-      if not command_missing then
+      if not command_missing and not timed_out then
         local parser_result
         parser_result, parser_used = parse_with_fallback(parser_name, parser_fn, ctx, res.code)
         items = parser_result.items or {}
@@ -370,13 +376,15 @@ function M.run(cmd, opts)
         items = filtered
       end
 
-      if command_missing then
-        items = {}
-      end
-
       apply_quickfix(title, items, open_policy, quickfix_view)
 
-      if command_missing then
+      if timed_out then
+        progress_notify.finish(
+          progress,
+          string.format('check: timed out after %dms (%s)', opts.timeout_ms, title),
+          vim.log.levels.ERROR
+        )
+      elseif command_missing then
         progress_notify.finish(
           progress,
           string.format('check: failed to run (%s): command not found', title),
