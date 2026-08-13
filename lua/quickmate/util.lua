@@ -17,7 +17,9 @@ end
 ---@param cmd string
 ---@return string
 function M.normalize_command_input(cmd)
-  local trimmed = M.strip_newlines(cmd or '')
+  -- join lines but keep inner spacing intact: quoted arguments may contain
+  -- significant runs of whitespace
+  local trimmed = (cmd or ''):gsub('[\r\n]+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
   local first = trimmed:sub(1, 1)
   local last = trimmed:sub(-1)
   if #trimmed >= 2 and ((first == '"' and last == '"') or (first == "'" and last == "'")) then
