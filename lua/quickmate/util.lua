@@ -148,6 +148,13 @@ end
 ---@return table
 local function normalize_item(item, base_cwd)
   local filename = item.filename
+  -- items parsed via getqflist({ lines = ..., efm = ... }) carry bufnr, not filename
+  if (not filename or filename == '') and type(item.bufnr) == 'number' and item.bufnr > 0 then
+    local bufname = vim.api.nvim_buf_get_name(item.bufnr)
+    if bufname ~= '' then
+      filename = vim.fn.fnamemodify(bufname, ':.')
+    end
+  end
   if filename and filename ~= '' then
     if not is_absolute_path(filename) and type(base_cwd) == 'string' and base_cwd ~= '' then
       filename = vim.fs.joinpath(base_cwd, filename)
