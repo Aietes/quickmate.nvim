@@ -128,25 +128,27 @@ local function resolve_cwd(cmd, opts)
   return vim.fs.root(0, { '.git' }) or current_dir()
 end
 
----@param path string
+---@param cwd string
+---@param names string[]
 ---@return boolean
-local function exists(path)
-  return vim.uv.fs_stat(path) ~= nil
+local function has_lockfile_upward(cwd, names)
+  -- workspaces keep the lockfile at the repo root, not in the package dir
+  return vim.fs.root(cwd, names) ~= nil
 end
 
 ---@param cwd string
 ---@return string|nil
 local function detect_package_manager(cwd)
-  if exists(vim.fs.joinpath(cwd, 'pnpm-lock.yaml')) and vim.fn.executable('pnpm') == 1 then
+  if has_lockfile_upward(cwd, { 'pnpm-lock.yaml' }) and vim.fn.executable('pnpm') == 1 then
     return 'pnpm'
   end
-  if (exists(vim.fs.joinpath(cwd, 'bun.lock')) or exists(vim.fs.joinpath(cwd, 'bun.lockb'))) and vim.fn.executable('bun') == 1 then
+  if has_lockfile_upward(cwd, { 'bun.lock', 'bun.lockb' }) and vim.fn.executable('bun') == 1 then
     return 'bun'
   end
-  if exists(vim.fs.joinpath(cwd, 'package-lock.json')) and vim.fn.executable('npm') == 1 then
+  if has_lockfile_upward(cwd, { 'package-lock.json' }) and vim.fn.executable('npm') == 1 then
     return 'npm'
   end
-  if exists(vim.fs.joinpath(cwd, 'yarn.lock')) and vim.fn.executable('yarn') == 1 then
+  if has_lockfile_upward(cwd, { 'yarn.lock' }) and vim.fn.executable('yarn') == 1 then
     return 'yarn'
   end
   for _, pm in ipairs(state.package_manager_priority) do
@@ -301,6 +303,9 @@ end
 local function has_file_target(item)
   return type(item.filename) == 'string' and item.filename ~= ''
 end
+
+-- exposed for tests only
+M._detect_package_manager = detect_package_manager
 
 ---@param cmd string
 ---@param opts quickmate.RunOpts|nil
