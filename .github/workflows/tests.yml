@@ -2,6 +2,7 @@ name: tests
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -9,7 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        neovim: [stable, nightly]
+        # v0.10.4 is the documented minimum supported version
+        neovim: [v0.10.4, v0.11.7, stable, nightly]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
