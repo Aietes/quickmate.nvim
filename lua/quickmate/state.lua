@@ -14,6 +14,7 @@ M.known_package_managers = {
 ---@field commands boolean
 ---@field commands_registered boolean
 ---@field builtins_registered boolean
+---@field warned_trouble_unavailable boolean
 ---@field package_manager string|nil
 ---@field package_manager_priority string[]
 ---@field parsers table<string, fun(ctx: quickmate.ParserContext): quickmate.ParserResult|nil>
@@ -25,6 +26,7 @@ M.state = {
   commands = true,
   commands_registered = false,
   builtins_registered = false,
+  warned_trouble_unavailable = false,
   package_manager = nil,
   package_manager_priority = { 'pnpm', 'bun', 'npm', 'yarn' },
   parsers = {},
@@ -42,6 +44,7 @@ function M.reset_config()
   M.state.parsers = {}
   M.state.presets = {}
   M.state.builtins_registered = false
+  M.state.warned_trouble_unavailable = false
   M.state.commands_registered = commands_registered
 end
 

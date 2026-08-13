@@ -54,8 +54,6 @@ local function auto_parser_for_command(cmd)
   return nil
 end
 
-local warned_trouble_unavailable = false
-
 -- monotonically increasing id; completions of older runs must not clobber
 -- the quickfix list of a newer one
 local run_generation = 0
@@ -66,11 +64,11 @@ local function open_trouble()
   if not ok or type(trouble) ~= 'table' or type(trouble.open) ~= 'function' then
     return false
   end
-  -- Trouble v3 names the quickfix mode "qflist", v2 named it "quickfix"
-  if pcall(trouble.open, 'qflist') then
-    return true
-  end
-  return (pcall(trouble.open, 'quickfix'))
+  -- Trouble v3 names the quickfix mode "qflist", v2 named it "quickfix".
+  -- v3 reports unknown modes asynchronously instead of raising, so pick the
+  -- mode by feature-detecting v3 (statusline is v3-only) rather than retrying.
+  local mode = type(trouble.statusline) == 'function' and 'qflist' or 'quickfix'
+  return (pcall(trouble.open, mode))
 end
 
 ---@param title string
@@ -86,8 +84,8 @@ local function apply_quickfix(title, items, open_policy, view)
     if open_trouble() then
       return
     end
-    if not warned_trouble_unavailable then
-      warned_trouble_unavailable = true
+    if not state.warned_trouble_unavailable then
+      state.warned_trouble_unavailable = true
       vim.notify('check: quickfix_view "trouble" but trouble.nvim is unavailable, falling back to quickfix window', vim.log.levels.WARN)
     end
   end

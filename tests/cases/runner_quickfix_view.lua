@@ -1,12 +1,13 @@
-return function(t)
+return function(t, ctx)
   local quickmate = require 'quickmate'
 
-  -- 1) trouble.nvim available: open via stubbed trouble instead of copen
+  -- 1) trouble.nvim available: open via stubbed trouble (v3 shape) instead of copen
   local trouble_calls = {}
   package.loaded['trouble'] = {
     open = function(mode)
       trouble_calls[#trouble_calls + 1] = mode
     end,
+    statusline = function() end,
   }
 
   local done = false
@@ -31,6 +32,7 @@ return function(t)
 
   -- 2) trouble.nvim unavailable: warn once and fall back to the quickfix window
   package.loaded['trouble'] = nil
+  ctx.state.warned_trouble_unavailable = false
 
   local original_notify = vim.notify
   local captured = {}
