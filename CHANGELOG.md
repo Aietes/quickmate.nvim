@@ -6,6 +6,19 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ## [Unreleased]
 
+### Changed
+- Built-in `lua`/`selene`/`luacheck` presets now lint `.` instead of the hardcoded `lua tests` directories, and the `clippy`/`rust` presets no longer force `SQLX_OFFLINE=true`. Override via `register_preset()`/`setup({ presets = ... })` (e.g. `env = { SQLX_OFFLINE = 'true' }`) to restore the old behavior.
+- Timed-out runs now report "timed out after Nms" instead of a generic exit-124 failure, and no longer parse partial output into the quickfix list.
+
+### Fixed
+- The `efm` errorformat fallback produced no items at all: entries parsed via `getqflist({lines, efm})` carry `bufnr` instead of `filename` and were dropped by normalization. Generic tools now populate quickfix correctly.
+- Clean `tsc`/`nuxt typecheck` (and typecheck-only script) runs no longer emit a spurious "parser failed, used efm fallback" warning.
+- Calling `register_parser()`/`register_preset()` before `setup()` no longer blocks built-in parser/preset registration.
+- Package-manager lockfiles are now found at the workspace root in monorepos, not just in the nearest `package.json` directory.
+- Overlapping runs no longer let a slow, stale check overwrite a newer check's quickfix results.
+- `:Check` no longer collapses significant whitespace inside quoted command arguments.
+- Diagnostics merely containing the phrase "command not found" are no longer misreported as a missing command.
+
 ### Added
 - New `quickfix_view` option (`'quickfix' | 'trouble'`, default `'quickfix'`), available in `setup()`, per run, and per preset. With `'trouble'`, results open in [trouble.nvim](https://github.com/folke/trouble.nvim)'s quickfix mode instead of the quickfix window (the quickfix list is still populated either way), with a graceful one-time-warning fallback to the quickfix window when trouble.nvim is not installed.
 

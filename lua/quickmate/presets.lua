@@ -34,13 +34,11 @@ function M.register_builtin_presets(state)
     cmd = 'cargo clippy --message-format=json',
     title = 'clippy',
     parser = 'cargo_json',
-    env = { SQLX_OFFLINE = 'true' },
   }
   state.presets.rust = {
     cmd = 'cargo check --message-format=json',
     title = 'cargo check',
     parser = 'cargo_json',
-    env = { SQLX_OFFLINE = 'true' },
   }
   state.presets.tsc = {
     cmd = function(ctx)
@@ -57,17 +55,17 @@ function M.register_builtin_presets(state)
     parser = 'ts_text',
   }
   state.presets.lua = {
-    cmd = 'selene --display-style Json2 --allow-warnings lua tests',
+    cmd = 'selene --display-style Json2 --allow-warnings .',
     title = 'selene',
     parser = 'selene',
   }
   state.presets.selene = {
-    cmd = 'selene --display-style Json2 --allow-warnings lua tests',
+    cmd = 'selene --display-style Json2 --allow-warnings .',
     title = 'selene',
     parser = 'selene',
   }
   state.presets.luacheck = {
-    cmd = 'luacheck lua tests',
+    cmd = 'luacheck .',
     title = 'luacheck',
     parser = 'luacheck',
   }

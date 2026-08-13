@@ -137,14 +137,14 @@ Key principles for mixed output checks:
   Example command: `pnpm exec nuxt typecheck`  
   https://nuxt.com/docs/api/commands/typecheck
 - `lua`: Lua diagnostics via `selene` (default Lua preset).  
-  Example command: `selene --display-style Json2 --allow-warnings lua tests`  
+  Example command: `selene --display-style Json2 --allow-warnings .`  
   https://kampfkarren.github.io/selene/
   Uses project `selene.toml` + `vim.toml` so Neovim `vim.*` globals are recognized.
 - `selene`: Explicit selene preset (same command as `lua`).  
-  Example command: `selene --display-style Json2 --allow-warnings lua tests`  
+  Example command: `selene --display-style Json2 --allow-warnings .`  
   https://kampfkarren.github.io/selene/
 - `luacheck`: Optional luacheck preset for luacheck-style output.  
-  Example command: `luacheck lua tests`  
+  Example command: `luacheck .`  
   https://github.com/lunarmodules/luacheck
 
 ## Configuration
