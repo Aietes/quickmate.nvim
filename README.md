@@ -154,6 +154,7 @@ For `lazy.nvim`:
 ```lua
 opts = {
   open_quickfix = 'on_items', -- 'on_items' | 'always' | 'never'
+  quickfix_view = 'quickfix', -- 'quickfix' | 'trouble'
   default_errorformat = vim.o.errorformat,
   commands = true,
   package_manager = nil, -- 'pnpm' | 'bun' | 'npm' | 'yarn' | nil (auto)
@@ -169,6 +170,10 @@ opts = {
 ```
 
 For manual (non-`lazy.nvim`) configuration, call `require('quickmate').setup(...)` and pass options table.
+
+### Trouble Integration
+
+With `quickfix_view = 'trouble'`, results are shown in [trouble.nvim](https://github.com/folke/trouble.nvim) instead of the quickfix window. Diagnostics still populate the quickfix list as usual — **quickmate.nvim** simply opens Trouble's quickfix mode (`qflist`) on it, respecting the `open_quickfix` policy. If trouble.nvim is not installed, **quickmate.nvim** warns once and falls back to the regular quickfix window. The option is also accepted per run (`run(cmd, { quickfix_view = 'trouble' })`) and per preset.
 
 ## Package Manager Detection
 

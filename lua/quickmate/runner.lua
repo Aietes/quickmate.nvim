@@ -43,14 +43,40 @@ local function auto_parser_for_command(cmd)
   return nil
 end
 
+local warned_trouble_unavailable = false
+
+---@return boolean
+local function open_trouble()
+  local ok, trouble = pcall(require, 'trouble')
+  if not ok or type(trouble) ~= 'table' or type(trouble.open) ~= 'function' then
+    return false
+  end
+  -- Trouble v3 names the quickfix mode "qflist", v2 named it "quickfix"
+  if pcall(trouble.open, 'qflist') then
+    return true
+  end
+  return (pcall(trouble.open, 'quickfix'))
+end
+
 ---@param title string
 ---@param items table[]
 ---@param open_policy quickmate.OpenQuickfixPolicy
-local function apply_quickfix(title, items, open_policy)
+---@param view quickmate.QuickfixView
+local function apply_quickfix(title, items, open_policy, view)
   vim.fn.setqflist({}, 'r', { title = title, items = items })
-  if open_policy == 'always' or (open_policy == 'on_items' and #items > 0) then
-    vim.cmd 'copen'
+  if not (open_policy == 'always' or (open_policy == 'on_items' and #items > 0)) then
+    return
   end
+  if view == 'trouble' then
+    if open_trouble() then
+      return
+    end
+    if not warned_trouble_unavailable then
+      warned_trouble_unavailable = true
+      vim.notify('check: quickfix_view "trouble" but trouble.nvim is unavailable, falling back to quickfix window', vim.log.levels.WARN)
+    end
+  end
+  vim.cmd 'copen'
 end
 
 ---@param cmd string
@@ -273,6 +299,7 @@ function M.run(cmd, opts)
   local cwd = resolve_cwd(cmd, opts)
   local errorformat = opts.errorformat or state.default_errorformat or vim.o.errorformat
   local open_policy = opts.open_quickfix or state.open_quickfix
+  local quickfix_view = opts.quickfix_view or state.quickfix_view
   local started_at = vim.uv.hrtime()
   local parser_name, parser_fn = resolve_explicit_parser(cmd, opts)
 
@@ -335,7 +362,7 @@ function M.run(cmd, opts)
         items = {}
       end
 
-      apply_quickfix(title, items, open_policy)
+      apply_quickfix(title, items, open_policy, quickfix_view)
 
       if command_missing then
         progress_notify.finish(

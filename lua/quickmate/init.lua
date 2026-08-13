@@ -9,9 +9,11 @@ local M = {}
 M.VERSION = version.current
 
 ---@alias quickmate.OpenQuickfixPolicy 'on_items'|'always'|'never'
+---@alias quickmate.QuickfixView 'quickfix'|'trouble'
 
 ---@class quickmate.SetupOpts
 ---@field open_quickfix? quickmate.OpenQuickfixPolicy
+---@field quickfix_view? quickmate.QuickfixView
 ---@field default_errorformat? string
 ---@field commands? boolean
 ---@field package_manager? string
@@ -27,6 +29,7 @@ M.VERSION = version.current
 ---@field parser? string|(fun(ctx: quickmate.ParserContext): quickmate.ParserResult)|nil
 ---@field errorformat? string
 ---@field open_quickfix? quickmate.OpenQuickfixPolicy
+---@field quickfix_view? quickmate.QuickfixView
 ---@field on_complete? fun(result: quickmate.RunResult)
 
 ---@class quickmate.PresetCmdCtx
@@ -42,6 +45,7 @@ M.VERSION = version.current
 ---@field env? table<string, string>
 ---@field timeout_ms? integer
 ---@field open_quickfix? quickmate.OpenQuickfixPolicy
+---@field quickfix_view? quickmate.QuickfixView
 
 ---@class quickmate.ParserContext
 ---@field cmd string
@@ -76,6 +80,12 @@ local known_package_managers = state_mod.known_package_managers
 ---@return boolean
 local function is_valid_open_quickfix(policy)
   return policy == 'on_items' or policy == 'always' or policy == 'never'
+end
+
+---@param view string|nil
+---@return boolean
+local function is_valid_quickfix_view(view)
+  return view == 'quickfix' or view == 'trouble'
 end
 
 ---@param cmd string
@@ -135,6 +145,9 @@ function M.setup(opts)
 
   if is_valid_open_quickfix(opts.open_quickfix) then
     state.open_quickfix = opts.open_quickfix
+  end
+  if is_valid_quickfix_view(opts.quickfix_view) then
+    state.quickfix_view = opts.quickfix_view
   end
   if type(opts.default_errorformat) == 'string' and opts.default_errorformat ~= '' then
     state.default_errorformat = opts.default_errorformat

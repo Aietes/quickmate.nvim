@@ -9,6 +9,7 @@ M.known_package_managers = {
 
 ---@class quickmate.State
 ---@field open_quickfix quickmate.OpenQuickfixPolicy
+---@field quickfix_view quickmate.QuickfixView
 ---@field default_errorformat string
 ---@field commands boolean
 ---@field commands_registered boolean
@@ -18,6 +19,7 @@ M.known_package_managers = {
 ---@field presets table<string, quickmate.PresetOpts>
 M.state = {
   open_quickfix = 'on_items',
+  quickfix_view = 'quickfix',
   default_errorformat = vim.o.errorformat,
   commands = true,
   commands_registered = false,
@@ -30,6 +32,7 @@ M.state = {
 function M.reset_config()
   local commands_registered = M.state.commands_registered
   M.state.open_quickfix = 'on_items'
+  M.state.quickfix_view = 'quickfix'
   M.state.default_errorformat = vim.o.errorformat
   M.state.commands = true
   M.state.package_manager = nil

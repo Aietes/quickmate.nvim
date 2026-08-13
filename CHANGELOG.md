@@ -7,7 +7,7 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 ## [Unreleased]
 
 ### Added
-- No unreleased entries yet.
+- New `quickfix_view` option (`'quickfix' | 'trouble'`, default `'quickfix'`), available in `setup()`, per run, and per preset. With `'trouble'`, results open in [trouble.nvim](https://github.com/folke/trouble.nvim)'s quickfix mode instead of the quickfix window (the quickfix list is still populated either way), with a graceful one-time-warning fallback to the quickfix window when trouble.nvim is not installed.
 
 ## [0.1.7] - 2026-03-02
 
