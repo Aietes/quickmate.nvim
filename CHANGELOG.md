@@ -6,9 +6,18 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+- No unreleased entries yet.
+
+## [0.1.8] - 2026-08-13
+
+### Added
+- New `quickfix_view` option (`'quickfix' | 'trouble'`, default `'quickfix'`), available in `setup()`, per run, and per preset. With `'trouble'`, results open in [trouble.nvim](https://github.com/folke/trouble.nvim)'s quickfix mode instead of the quickfix window (the quickfix list is still populated either way), with a graceful one-time-warning fallback to the quickfix window when trouble.nvim is not installed.
+
 ### Changed
 - Built-in `lua`/`selene`/`luacheck` presets now lint `.` instead of the hardcoded `lua tests` directories, and the `clippy`/`rust` presets no longer force `SQLX_OFFLINE=true`. Override via `register_preset()`/`setup({ presets = ... })` (e.g. `env = { SQLX_OFFLINE = 'true' }`) to restore the old behavior.
 - Timed-out runs now report "timed out after Nms" instead of a generic exit-124 failure, and no longer parse partial output into the quickfix list.
+- CI now tests the documented Neovim 0.10 minimum (v0.10.4) alongside v0.11.7, stable, and nightly.
 
 ### Fixed
 - The `efm` errorformat fallback produced no items at all: entries parsed via `getqflist({lines, efm})` carry `bufnr` instead of `filename` and were dropped by normalization. Generic tools now populate quickfix correctly.
@@ -18,9 +27,8 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 - Overlapping runs no longer let a slow, stale check overwrite a newer check's quickfix results.
 - `:Check` no longer collapses significant whitespace inside quoted command arguments.
 - Diagnostics merely containing the phrase "command not found" are no longer misreported as a missing command.
-
-### Added
-- New `quickfix_view` option (`'quickfix' | 'trouble'`, default `'quickfix'`), available in `setup()`, per run, and per preset. With `'trouble'`, results open in [trouble.nvim](https://github.com/folke/trouble.nvim)'s quickfix mode instead of the quickfix window (the quickfix list is still populated either way), with a graceful one-time-warning fallback to the quickfix window when trouble.nvim is not installed.
+- CRLF output no longer leaks carriage returns into quickfix item text.
+- oxlint/eslint JSON parsers no longer treat arbitrary JSON output as an empty lint report.
 
 ## [0.1.7] - 2026-03-02
 
