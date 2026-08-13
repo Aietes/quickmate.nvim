@@ -11,7 +11,10 @@ return function(t)
   ---@type quickmate.RunResult|nil
   local result = nil
 
-  quickmate.run("sh -c 'printf \"file.lua:1:1: partial\\n\"; sleep 5'", {
+  -- keep the straggler sleep short: the timeout SIGTERM hits the shell, but a
+  -- surviving child holds the stdout pipe open and delays the callback until
+  -- it exits, so the wait below must comfortably outlast the full sleep
+  quickmate.run("printf 'file.lua:1:1: partial\\n'; sleep 2", {
     parser = 'efm',
     errorformat = '%f:%l:%c: %m',
     timeout_ms = 200,
@@ -22,7 +25,7 @@ return function(t)
     end,
   })
 
-  local ok = vim.wait(4000, function()
+  local ok = vim.wait(8000, function()
     return done
   end, 20)
 
