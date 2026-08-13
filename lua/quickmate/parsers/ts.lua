@@ -22,6 +22,10 @@ local location_only_patterns = {
 ---@param ctx quickmate.ParserContext
 ---@return quickmate.ParserResult|nil
 function M.parse(ctx)
+  if util.strip_ansi(ctx.combined):match '^%s*$' then
+    return { items = {}, ok = true }
+  end
+
   local items = {}
   local current = nil
   local pending = nil

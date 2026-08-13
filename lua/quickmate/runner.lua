@@ -232,9 +232,10 @@ end
 ---@param parser_name string|nil
 ---@param parser_fn (fun(ctx: quickmate.ParserContext): quickmate.ParserResult|nil)|nil
 ---@param ctx quickmate.ParserContext
+---@param exit_code integer
 ---@return quickmate.ParserResult
 ---@return string
-local function parse_with_fallback(parser_name, parser_fn, ctx)
+local function parse_with_fallback(parser_name, parser_fn, ctx, exit_code)
   local used_fallback = false
 
   if parser_fn then
@@ -256,7 +257,7 @@ local function parse_with_fallback(parser_name, parser_fn, ctx)
   if not parsed then
     parsed = { items = {}, ok = true }
   end
-  if used_fallback then
+  if used_fallback and exit_code ~= 0 then
     vim.notify(string.format('check: parser failed, used efm fallback (%s)', ctx.title), vim.log.levels.WARN)
   end
   return parsed, 'efm'
@@ -344,7 +345,7 @@ function M.run(cmd, opts)
 
       if not command_missing then
         local parser_result
-        parser_result, parser_used = parse_with_fallback(parser_name, parser_fn, ctx)
+        parser_result, parser_used = parse_with_fallback(parser_name, parser_fn, ctx, res.code)
         items = parser_result.items or {}
       end
 

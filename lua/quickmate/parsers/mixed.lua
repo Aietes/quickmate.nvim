@@ -65,6 +65,9 @@ function M.parse(ctx, deps)
   end
 
   if not matched_payload then
+    if util.strip_ansi(ctx.combined):match '^%s*$' then
+      return { items = {}, ok = true }
+    end
     return nil
   end
   return { items = util.normalize_items(all_items, ctx.cwd), ok = true }
