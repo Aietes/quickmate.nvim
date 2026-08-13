@@ -6,7 +6,7 @@ local M = {}
 ---@return quickmate.ParserResult|nil
 function M.parse_json(ctx)
   local decoded = util.decode_json_candidate(util.strip_ansi(ctx.stdout ~= '' and ctx.stdout or ctx.combined))
-  if type(decoded) ~= 'table' then
+  if type(decoded) ~= 'table' or not M.is_payload(decoded) then
     return nil
   end
 
@@ -106,6 +106,10 @@ function M.is_payload(decoded)
     return false
   end
   local first = decoded[1]
+  if first == nil then
+    -- a clean eslint run emits an empty array
+    return true
+  end
   return type(first) == 'table' and (first.filePath ~= nil or first.messages ~= nil)
 end
 

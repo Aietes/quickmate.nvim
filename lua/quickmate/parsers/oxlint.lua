@@ -4,10 +4,26 @@ local M = {}
 
 ---@param ctx quickmate.ParserContext
 ---@return quickmate.ParserResult|nil
+---@param decoded table
+---@return boolean
+local function has_lint_shape(decoded)
+  local function entry_like(entry)
+    return type(entry) == 'table' and (type(entry.messages) == 'table' or type(entry.diagnostics) == 'table')
+  end
+  if entry_like(decoded) then
+    return true
+  end
+  if vim.islist(decoded) then
+    return #decoded == 0 or entry_like(decoded[1])
+  end
+  return false
+end
+
 function M.parse_json(ctx)
   local input = util.strip_ansi(ctx.stdout ~= '' and ctx.stdout or ctx.combined)
   local decoded = util.decode_json_candidate(input)
-  if type(decoded) ~= 'table' then
+  if type(decoded) ~= 'table' or not has_lint_shape(decoded) then
+    -- arbitrary JSON in the output is not an oxlint report; let text/efm try
     return nil
   end
 

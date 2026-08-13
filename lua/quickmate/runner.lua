@@ -45,10 +45,10 @@ local function auto_parser_for_command(cmd)
   if lower:match 'selene' then
     return 'selene'
   end
-  if lower:match 'cargo' and lower:match '%-%-message%-format%s*=%s*json' then
+  if lower:match 'cargo' and lower:match '%-%-message%-format[=%s]%s*json' then
     return 'cargo_json'
   end
-  if lower:match 'tsc' or lower:match 'nuxt%s+typecheck' then
+  if lower:match '%f[%w]tsc%f[%W]' or lower:match 'nuxt%s+typecheck' then
     return 'ts_text'
   end
   return nil
@@ -441,8 +441,8 @@ function M.run(cmd, opts)
   end)
 
   if not ok then
-    progress_notify.stop(progress)
-    vim.notify(
+    progress_notify.finish(
+      progress,
       string.format('check: failed to run (%s): %s', title, util.strip_newlines(tostring(err))),
       vim.log.levels.ERROR
     )

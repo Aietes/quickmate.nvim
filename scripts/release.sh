@@ -56,10 +56,11 @@ if [ "$DRY_RUN" = "--dry-run" ]; then
     echo "[dry-run] Note: missing changelog section '$CHANGELOG_HEADER...'"
     echo "[dry-run]       Add a section like: ## [$VERSION] - $(date +%Y-%m-%d)"
   fi
+  echo "[dry-run] Would run ./scripts/test.sh"
   echo "[dry-run] Would write VERSION"
   echo "[dry-run] Would write lua/quickmate/version.lua"
-  echo "[dry-run] Would run ./scripts/test.sh"
-  echo "[dry-run] Would git add VERSION lua/quickmate/version.lua"
+  echo "[dry-run] Would regenerate doc/tags"
+  echo "[dry-run] Would git add VERSION lua/quickmate/version.lua doc/tags"
   echo "[dry-run] Would git commit -m \"chore(release): v$VERSION\""
   echo "[dry-run] Would git tag v$VERSION"
   echo "[dry-run] Done"
@@ -85,6 +86,9 @@ fi
 
 echo "Releasing quickmate.nvim $VERSION"
 
+# test before touching version files so a failure leaves the tree clean
+./scripts/test.sh
+
 printf '%s\n' "$VERSION" > VERSION
 
 cat > lua/quickmate/version.lua <<EOF
@@ -95,9 +99,9 @@ M.current = '$VERSION'
 return M
 EOF
 
-./scripts/test.sh
+nvim --headless -u NONE -c 'helptags doc' -c 'qa'
 
-git add VERSION lua/quickmate/version.lua
+git add VERSION lua/quickmate/version.lua doc/tags
 if git diff --cached --quiet; then
   echo "No version file changes to commit; tagging current HEAD."
 else
