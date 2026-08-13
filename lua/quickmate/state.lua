@@ -13,6 +13,7 @@ M.known_package_managers = {
 ---@field default_errorformat string
 ---@field commands boolean
 ---@field commands_registered boolean
+---@field builtins_registered boolean
 ---@field package_manager string|nil
 ---@field package_manager_priority string[]
 ---@field parsers table<string, fun(ctx: quickmate.ParserContext): quickmate.ParserResult|nil>
@@ -23,6 +24,7 @@ M.state = {
   default_errorformat = vim.o.errorformat,
   commands = true,
   commands_registered = false,
+  builtins_registered = false,
   package_manager = nil,
   package_manager_priority = { 'pnpm', 'bun', 'npm', 'yarn' },
   parsers = {},
@@ -39,6 +41,7 @@ function M.reset_config()
   M.state.package_manager_priority = { 'pnpm', 'bun', 'npm', 'yarn' }
   M.state.parsers = {}
   M.state.presets = {}
+  M.state.builtins_registered = false
   M.state.commands_registered = commands_registered
 end
 

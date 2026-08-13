@@ -10,12 +10,23 @@ local state = state_mod.state
 local known_package_managers = state_mod.known_package_managers
 
 local function ensure_builtins_registered()
-  if vim.tbl_isempty(state.parsers) then
-    parser_registry.register_builtin_parsers(state)
+  if state.builtins_registered then
+    return
   end
-  if vim.tbl_isempty(state.presets) then
-    preset_registry.register_builtin_presets(state)
+  -- entries registered before setup() must survive and win over builtins
+  local user_parsers = state.parsers
+  local user_presets = state.presets
+  state.parsers = {}
+  state.presets = {}
+  parser_registry.register_builtin_parsers(state)
+  preset_registry.register_builtin_presets(state)
+  for name, parser_fn in pairs(user_parsers) do
+    state.parsers[name] = parser_fn
   end
+  for name, preset in pairs(user_presets) do
+    state.presets[name] = preset
+  end
+  state.builtins_registered = true
 end
 
 ---@param cmd string

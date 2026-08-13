@@ -6,6 +6,7 @@ return function(t, ctx)
   local captured = {}
 
   ctx.state.parsers = {}
+  ctx.state.builtins_registered = false
   vim.notify = function(message, level, opts)
     captured[#captured + 1] = tostring(message)
     if level == vim.log.levels.ERROR and opts and opts.title == 'quickmate tests' then

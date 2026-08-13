@@ -142,6 +142,7 @@ function M.setup(opts)
 
   parser_registry.register_builtin_parsers(state)
   presets.register_builtin_presets(state)
+  state.builtins_registered = true
 
   if is_valid_open_quickfix(opts.open_quickfix) then
     state.open_quickfix = opts.open_quickfix
