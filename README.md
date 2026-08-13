@@ -123,7 +123,8 @@ Key principles for mixed output checks:
   https://oxc.rs/docs/guide/usage/linter.html
 - `eslint`: Widely used JavaScript/TypeScript linter with extensive plugin ecosystem.  
   Example command: `pnpm exec eslint -f json .`  
-  https://eslint.org/
+  https://eslint.org/  
+  Note: since ESLint v10, flat config is resolved from each linted file's directory (not the cwd), which can change which config applies when checking from a subdirectory.
 - `clippy`: Rust lint collection for catching common mistakes and improving code quality.  
   Example command: `cargo clippy --message-format=json`  
   https://doc.rust-lang.org/clippy/

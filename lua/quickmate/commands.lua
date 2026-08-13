@@ -71,7 +71,7 @@ function M.register(state, api)
   end, {
     nargs = 1,
     complete = package_json_script_complete,
-    desc = 'Run pnpm script and parse output into quickfix',
+    desc = 'Run package manager script and parse output into quickfix',
   })
 
   vim.api.nvim_create_user_command('CheckPreset', function(args)
