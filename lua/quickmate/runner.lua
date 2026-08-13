@@ -308,6 +308,7 @@ end
 
 -- exposed for tests only
 M._detect_package_manager = detect_package_manager
+M._build_script_command = build_script_command
 
 ---@param cmd string
 ---@param opts quickmate.RunOpts|nil
@@ -359,7 +360,7 @@ function M.run(cmd, opts)
         cwd = cwd,
         stdout = stdout,
         stderr = stderr,
-        combined = util.strip_ansi(combined),
+        combined = util.strip_ansi(combined):gsub('\r\n', '\n'),
         errorformat = errorformat,
       }
 
