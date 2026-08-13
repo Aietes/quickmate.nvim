@@ -56,6 +56,10 @@ end
 
 local warned_trouble_unavailable = false
 
+-- monotonically increasing id; completions of older runs must not clobber
+-- the quickfix list of a newer one
+local run_generation = 0
+
 ---@return boolean
 local function open_trouble()
   local ok, trouble = pcall(require, 'trouble')
@@ -324,6 +328,8 @@ function M.run(cmd, opts)
   local quickfix_view = opts.quickfix_view or state.quickfix_view
   local started_at = vim.uv.hrtime()
   local parser_name, parser_fn = resolve_explicit_parser(cmd, opts)
+  run_generation = run_generation + 1
+  local generation = run_generation
 
   local progress = progress_notify.start({
     id_prefix = 'check_',
@@ -381,7 +387,9 @@ function M.run(cmd, opts)
         items = filtered
       end
 
-      apply_quickfix(title, items, open_policy, quickfix_view)
+      if generation == run_generation then
+        apply_quickfix(title, items, open_policy, quickfix_view)
+      end
 
       if timed_out then
         progress_notify.finish(
